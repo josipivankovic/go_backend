@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type Oglas struct {
@@ -51,12 +52,13 @@ func dodajOglas(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/oglasi", getOglasi).Methods("GET", "OPTIONS")
-	r.HandleFunc("/dodaj", dodajOglas).Methods("POST", "OPTIONS")
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(corsMiddleware)
 
-	handler := corsMiddleware(r)
+	r.Get("/oglasi", getOglasi)
+	r.Post("/dodaj", dodajOglas)
 
 	log.Println("✅ Server pokrenut na http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
